@@ -1,132 +1,165 @@
-# Architecture
+# Architecture — Kindling
 
-> Each module provides standalone value. Together, they create reinforcing loops.
+## What Kindling is
+
+An agent SEO platform. Kindling optimizes how autonomous agents discover, evaluate, and select services.
+
+The agent economy already has infrastructure. Kindling composes with it.
 
 ---
 
-## Module Relationships
+## What We Compose With (Not Rebuild)
+
+| Layer | Provider | What it does | Kindling's relationship |
+|-------|----------|-------------|------------------------|
+| **Payments** | [MCPay](https://mcpay.tech) / x402 standard | x402 payment gating for API calls | Compose — Igniter wraps MCPay; Twig measures x402 volume |
+| **Identity** | [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) | On-chain agent identity registry | Compose — don't rebuild; reference for wallet attribution |
+| **Discovery** | [x402-discovery](https://x402-discovery.rplryan.workers.dev/services) | Catalog of x402 services | Compose — Twig competitive analysis reads this catalog |
+| **Reputation** | [AgentScore](https://agentscore.xyz) / ERC-8004 registries | Reputation scoring for agents | Compose — don't rebuild; surface scores in Twig reports |
+| **Social** | [Moltbook](https://moltbook.com) | Agent social network | Compose — Flint is an optimization layer on top |
+
+---
+
+## Kindling's Layer
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  Service Developer                                           │
-│                                                             │
-│  npx @kindling/igniter init                                 │
-│       │                                                     │
-│       ▼                                                     │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │  Kindling Igniter (Phase 1)                         │   │
-│  │                                                     │   │
-│  │  x402 middleware  →  402 response with economics   │   │
-│  │  A2A generator    →  /.well-known/agent.json        │   │
-│  │  MCP wrapper      →  tool definitions               │   │
-│  └──────────────────────────┬──────────────────────────┘   │
-│                             │ on-chain payments             │
-└─────────────────────────────┼───────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Base Mainnet (x402 settlements)                            │
-│                                                             │
-│  Payment transactions  →  Kindling Verifier indexer         │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Kindling Verifier (Phase 1 → Phase 2)                      │
-│                                                             │
-│  Phase 1: Demand scores only (on-chain payment data)        │
-│  Phase 2: + Reliability (probes) + Outcome (benchmarks)     │
-│                                                             │
-│  Output: { demand, reliability, outcome }                   │
-│          each with confidence_interval + sample_size        │
-│          is_first_party flag on all PUC services            │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-              ┌────────────────┴────────────────┐
-              │                                 │
-              ▼                                 ▼
-┌─────────────────────────┐   ┌─────────────────────────────┐
-│  Kindling Documenter    │   │  Kindling Scout              │
-│  (Phase 2)              │   │  (Phase 3)                   │
-│                         │   │                              │
-│  Benchmark reports      │   │  Task routing engine         │
-│  Published methodology  │   │  Referral economics          │
-│  Raw data included      │   │  Audit log                   │
-│  Competitors included   │   │  Self-hostable               │
-└─────────────────────────┘   └─────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                     AGENT ECONOMY                       │
+│  (Autonomous systems making purchasing decisions)       │
+└────────────────────────┬────────────────────────────────┘
+                         │ selection signals
+                         ▼
+┌─────────────────────────────────────────────────────────┐
+│                  KINDLING LAYER                         │
+│  Twig — optimize what agents read about your service    │
+│  Flint — build social presence on agent platforms       │
+│  Igniter — scaffold the service infrastructure          │
+└──────────┬──────────────────┬───────────────────────────┘
+           │                  │
+           ▼                  ▼
+┌──────────────────┐  ┌───────────────────────────────────┐
+│  DISCOVERY LAYER │  │       INFRASTRUCTURE LAYER        │
+│  x402-discovery  │  │  MCPay · ERC-8004 · AgentScore    │
+│  MCPay registry  │  │  Base · Solana · MCP protocol     │
+│  Smithery        │  │  A2A standard                     │
+└──────────────────┘  └───────────────────────────────────┘
 ```
 
 ---
 
-## Data Flows
+## Product Architecture
 
-### Igniter → Chain → Verifier
+### Twig — Agent SEO for MCP services
 
-1. Service installs Kindling Igniter
-2. Agent calls service, receives 402 with payment details + referral disclosure
-3. Agent pays via x402, settlement lands on Base
-4. Verifier indexes the payment transaction
-5. Payment contributes to service's Demand score (after thresholds met)
+**Input sources:**
+- MCP server introspection (`tools/list` JSON-RPC)
+- A2A Agent Cards (`/.well-known/agent.json`)
+- OpenAPI specs
+- x402-discovery catalog
 
-### Verifier → Scout
-
-1. Scout queries Verifier for candidate services
-2. Verifier returns scores with `is_first_party` flags
-3. Scout applies routing policy: eligibility → quality floor → agent preferences → economics → first-party tie-break
-4. Scout logs decision factors for auditability
-
-### Verifier → Documenter
-
-1. Documenter runs benchmarks against services indexed by Verifier
-2. Results published with raw data + methodology
-3. Outcome scores feed back into Verifier (Phase 2)
-
----
-
-## Stack
-
-| Layer | Technology | Notes |
-|-------|-----------|-------|
-| Payment | x402 / HTTP 402 | Chain: Base (primary), configurable |
-| Agent discovery | MCP + A2A | Tool definitions + Agent Cards |
-| Identity | ERC-8004 | Optional but encouraged for trust signals |
-| Indexing | Custom indexer | Base mainnet RPC, open-source |
-| Scoring | TypeScript service | Deployed by PUC, reproducible locally |
-| Storage | PostgreSQL + on-chain | Scores in DB; payment proofs on-chain |
-| APIs | REST + MCP server | Verifier queryable by agents directly |
-
----
-
-## Phase Dependencies
-
+**Scoring pipeline:**
 ```
-Phase 1 (Foundation)
-├── Igniter: x402 + A2A + MCP scaffolding
-└── Verifier: demand scores from on-chain data
-
-Phase 2 (Credibility) — requires Phase 1 exit criteria
-├── Verifier: + reliability + outcome scores
-└── Documenter: benchmark engine
-
-Phase 3 (Routing) — requires Phase 2 exit criteria + 60 days data + 20 services
-└── Scout: task routing + referral economics
-
-Phase 4 (Aggregator) — requires 50 services + demonstrated routing differentiation
-└── Deploy only if preconditions met
+fetch descriptions
+       ↓
+score on 3 dimensions (Intent Match 40%, Specificity 35%, Differentiation 25%)
+       ↓
+compare against intent corpus (70 queries × 7 categories)
+       ↓
+generate 3 optimized variants (functional, structured, contextual)
+       ↓
+measure x402 revenue delta (Base RPC USDC transfer logs)
+       ↓
+weekly monitoring report (x402-gated, $0.50-2.00/report)
 ```
 
+**Data assets (compounding):**
+- Intent corpus: 70+ real agent queries by category, updated monthly
+- Competitive index: descriptions + scores for all indexed services
+- Category benchmarks: percentile ranks within category
+
+### Flint — Agent Social Growth
+
+**Input sources:**
+- Moltbook API (posts, karma, followers, comments)
+- Moltbook search trends
+
+**Pipeline:**
+```
+analyze existing posts (engagement patterns, timing, topics)
+       ↓
+score draft content (hook strength, hashtag match, clarity)
+       ↓
+schedule at optimal times (based on historical engagement data)
+       ↓
+track results (karma, comments, followers, growth rate)
+       ↓
+weekly report (what worked, what didn't, what to post next)
+```
+
+### Igniter — Infrastructure Scaffolding
+
+One-command setup for x402 + MCP + A2A on any service. Composes MCPay for payments. Generates A2A cards that Twig can then optimize.
+
 ---
 
-## Self-Hosting
+## What Kindling Does NOT Build
 
-Every module is self-hostable:
+| Capability | Why we don't build it | What to use instead |
+|-----------|----------------------|---------------------|
+| Payment routing | MCPay already does this well | MCPay / x402 standard |
+| Agent identity | ERC-8004 is the standard | ERC-8004 registry |
+| Service discovery index | x402-discovery already indexes services | x402-discovery |
+| Reputation scoring | Multiple providers exist | AgentScore, ERC-8004 registries |
+| Smart contract infrastructure | Out of scope for optimization layer | Existing L2s |
 
-- **Igniter**: npm/pip package, runs in your process
-- **Verifier**: Docker image + indexer, points at any Base RPC
-- **Scout**: Standalone router, can run without managed Scout service
-
-The managed Scout service (Phase 3) is optional. Agents can bypass it and query Verifier directly.
+Building these would be competing with infrastructure. Kindling is the optimization layer *on top* of infrastructure.
 
 ---
 
-*Architecture v1.0 · Kindling · March 2026*
+## Revenue Architecture
+
+| Product | Model | Price point |
+|---------|-------|-------------|
+| Twig Analyze | Free | Always free |
+| Twig Optimize | Free (3 variants) | Always free |
+| Twig Monitor | x402 per weekly report | $0.50–2.00/report |
+| Twig Competitive | x402 per query | $1.00/query |
+| Twig Intents | x402 per category | $0.50/category |
+| Twig Enterprise | 15% of measured x402 revenue increase | Performance-based |
+| Flint | TBD (post-KindSoul case study) | TBD |
+| Igniter | Free / open source | — |
+
+Everything is on-chain. Revenue claims are verifiable.
+
+---
+
+## Data Model
+
+### Intent Corpus
+The core compounding asset. Built from real agent query patterns observed across MCP registries, A2A delegation logs, and Moltbook search trends.
+
+```json
+{
+  "category": "crypto-defi",
+  "version": "2026-03",
+  "queries": [
+    "swap token on DEX",
+    "get swap quote for tokens",
+    "fetch wallet portfolio",
+    ...
+  ]
+}
+```
+
+Updated monthly. Historical versions preserved. Methodology published.
+
+### Score History
+Every Twig score is timestamped and stored. Score changes over time reveal:
+- Impact of description changes
+- Drift as competitors improve
+- Correlation with x402 volume changes
+
+---
+
+*See [governance.md](governance.md) for methodology change rules.*
+*See [economics.md](economics.md) for detailed revenue model.*

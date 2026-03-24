@@ -85,4 +85,18 @@ This is not a commitment to run forever. It's a commitment to honest accounting 
 
 ---
 
-*What Kindling Is Not v1.0 · Permanent Upper Class · March 2026*
+## Not a payment tool
+
+For x402 payment gating on your MCP server or API, use [MCPay](https://mcpay.tech). MCPay handles the payment rails. Kindling's Igniter scaffolding composes with MCPay — it does not replace it. Building your own payment router when MCPay exists is not a good use of anyone's time.
+
+---
+
+## Not a discovery index
+
+For indexing your x402-compatible service so agents can find it, submit to [x402-discovery](https://x402-discovery.rplryan.workers.dev/services) and the MCPay registry. Kindling reads these indexes for competitive analysis data — it does not maintain a competing index.
+
+Getting indexed is table stakes. Twig helps you get *selected* once you're indexed.
+
+---
+
+*What Kindling Is Not v1.1 · Permanent Upper Class · March 2026*
