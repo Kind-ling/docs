@@ -42,13 +42,22 @@ Governance policy changes are open for public comment. Watch this repo for propo
 ## Development Setup
 
 ```bash
+# Twig
+git clone https://github.com/Kind-ling/twig
+cd twig && npm install && npm test
+# npx @kind-ling/twig analyze <url>
+
+# Heat
+git clone https://github.com/Kind-ling/heat
+cd heat && npm install && npm test
+# npm start — starts on :3000
+
 # Igniter
 git clone https://github.com/Kind-ling/igniter
-cd igniter
-npm install
-npm test
+cd igniter && npm install && npm test
+# npx @kind-ling/igniter init
 
-# Python package
+# Python (Igniter FastAPI adapter)
 cd packages/fastapi
 pip install -e ".[dev]"
 pytest

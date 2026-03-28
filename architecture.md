@@ -2,7 +2,7 @@
 
 ## What Kindling is
 
-An agent SEO platform. Kindling optimizes how autonomous agents discover, evaluate, and select services.
+Agent SEO for the agent economy. Kindling optimizes how autonomous agents discover, evaluate, and select services — through better descriptions (Twig), real reputation signals (Heat), social presence (Flint), and infrastructure scaffolding (Igniter).
 
 The agent economy already has infrastructure. Kindling composes with it.
 
@@ -31,8 +31,9 @@ The agent economy already has infrastructure. Kindling composes with it.
                          ▼
 ┌─────────────────────────────────────────────────────────┐
 │                  KINDLING LAYER                         │
-│  Twig — optimize what agents read about your service    │
-│  Flint — build social presence on agent platforms       │
+│  Twig   — optimize what agents read about your service  │
+│  Heat   — reputation oracle: route, trust, compose      │
+│  Flint  — build social presence on agent platforms      │
 │  Igniter — scaffold the service infrastructure          │
 └──────────┬──────────────────┬───────────────────────────┘
            │                  │
@@ -41,7 +42,7 @@ The agent economy already has infrastructure. Kindling composes with it.
 │  DISCOVERY LAYER │  │       INFRASTRUCTURE LAYER        │
 │  x402-discovery  │  │  MCPay · ERC-8004 · AgentScore    │
 │  MCPay registry  │  │  Base · Solana · MCP protocol     │
-│  Smithery        │  │  A2A standard                     │
+│  Smithery        │  │  A2A standard · Moltbook          │
 └──────────────────┘  └───────────────────────────────────┘
 ```
 
@@ -96,9 +97,29 @@ track results (karma, comments, followers, growth rate)
 weekly report (what worked, what didn't, what to post next)
 ```
 
+### Heat — Reputation Oracle
+
+**Input sources:**
+- Moltbook social graph (karma, upvotes, tool mentions, follower links)
+- x402 payment history on Base (USDC transfer logs)
+
+**Pipeline:**
+```
+index Moltbook social graph → PageRank (damping 0.85, 50 iterations, karma-weighted)
+index x402 on-chain payments → economic graph (repeat payments, unique payers)
+       ↓
+combine: 40% social authority + 30% economic proof + 20% domain expertise + 10% recency
+       ↓
+anti-sybil pass (karma farming, upvote clusters, burst activity, wash trading)
+       ↓
+serve: /heat/score (free) · /heat/route ($0.001) · /heat/trust ($0.001) · /heat/compose ($0.005)
+```
+
+**Combined rank formula (for /heat/route):** 70% Heat score + 30% Twig description score.
+
 ### Igniter — Infrastructure Scaffolding
 
-One-command setup for x402 + MCP + A2A on any service. Composes MCPay for payments. Generates A2A cards that Twig can then optimize.
+One-command setup for x402 + MCP + A2A on any service. Composes MCPay for payments. Generates A2A cards that Twig can then optimize. Services built with Igniter can call `/heat/trust` to verify callers before fulfilling x402 payments.
 
 ---
 
@@ -126,6 +147,10 @@ Building these would be competing with infrastructure. Kindling is the optimizat
 | Twig Competitive | x402 per query | $1.00/query |
 | Twig Intents | x402 per category | $0.50/category |
 | Twig Enterprise | 15% of measured x402 revenue increase | Performance-based |
+| Heat /score | Free (rate limited) | 10/min free |
+| Heat /route | x402 per request | $0.001/request |
+| Heat /trust | x402 per request | $0.001/request |
+| Heat /compose | x402 per request | $0.005/request |
 | Flint | TBD (post-KindSoul case study) | TBD |
 | Igniter | Free / open source | — |
 

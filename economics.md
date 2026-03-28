@@ -63,6 +63,23 @@ These rules exist because ranking manipulation via economics would destroy the s
 
 ---
 
+## Heat Revenue Model
+
+Heat is a reputation oracle with a free tier and paid tiers gated by x402 on Base.
+
+| Endpoint | Price | What you get |
+|----------|-------|-------------|
+| `/heat/score` | Free (10/min) | 0–100 reputation score across 4 dimensions for any agent or service |
+| `/heat/route` | $0.001/request | Ranked list of services for a given capability. 70% Heat + 30% Twig combined rank. |
+| `/heat/trust` | $0.001/request | Trusted/untrusted verdict with confidence + sybil flags for an agent caller |
+| `/heat/compose` | $0.005/request | Full ordered workflow for an intent — tool chain with cost estimates |
+
+**Why the free `/score`:** Same principle as Twig — the score is the hook. An agent querying a service wants to know if it's trustworthy. Showing the score is free. Acting on it (routing, trust verification, workflow composition) costs micro-payments.
+
+**Why `/compose` costs 5x more:** It's workflow intelligence, not just tool selection. It returns an ordered multi-step plan with expected costs, which requires combining social graph, economic graph, and Twig description data. Higher compute, higher value.
+
+---
+
 ## Flint Revenue Model
 
 Flint is not monetized in Phase 1. It is:

@@ -8,6 +8,18 @@
 
 ---
 
+## Scope: What this covers
+
+**Heat** (shipped `@kind-ling/heat`) scores agents and services using a dual-graph model — Moltbook social graph + x402 economic graph. Heat scoring methodology is documented in [heat.md](heat.md).
+
+**Verifier** (this document) is the deeper multi-dimensional scoring system for Kindling's future infrastructure modules — covering Demand, Reliability, and Outcome independently. Verifier ships after Phase 1 exit criteria are met.
+
+If you're using Heat today, refer to [heat.md](heat.md). If you're contributing to or challenging Verifier methodology, you're in the right place.
+
+---
+
+---
+
 ## Three-Score Model
 
 Scores are **never collapsed into a single number**. Three independent scores, each measuring a different dimension:
